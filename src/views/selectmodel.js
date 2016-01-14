@@ -17,6 +17,8 @@
 'use strict';
 
 var initPlaySample = require('./playsample').initPlaySample;
+var initTcpServer = require('../tcpstreamupload').initTcpServer;
+var finiTcpServer = require('../tcpstreamupload').finiTcpServer;
 
 exports.initSelectModel = function(ctx) {
 
@@ -35,6 +37,7 @@ exports.initSelectModel = function(ctx) {
 
 
   $('#dropdownMenuList').click(function(evt) {
+    console.log('here');
     evt.preventDefault();
     evt.stopPropagation();
     console.log('Change view', $(evt.target).text());
@@ -45,6 +48,8 @@ exports.initSelectModel = function(ctx) {
     localStorage.setItem('currentModel', newModel);
     ctx.currentModel = newModel;
     initPlaySample(ctx);
+    finiTcpServer();
+    initTcpServer(newModel);
     $.publish('clearscreen');
   });
 

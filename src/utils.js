@@ -16,9 +16,6 @@
 
 'use strict';
 
-// For non-view logic
-var $ = require('jquery');
-
 var fileBlock = function(_offset, length, _file, readChunk) {
   var r = new FileReader();
   var blob = _file.slice(_offset, length + _offset);
@@ -106,11 +103,4 @@ exports.createTokenGenerator = function() {
     },
     getCount: function() { return hasBeenRunTimes; }
   };
-};
-
-exports.initPubSub = function() {
-  var o         = $({});
-  $.subscribe   = o.on.bind(o);
-  $.unsubscribe = o.off.bind(o);
-  $.publish     = o.trigger.bind(o);
 };

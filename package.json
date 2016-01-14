@@ -3,7 +3,11 @@
   "version": "1.0.1",
   "description": "A sample browser app for Bluemix that use the speech-to-text service, fetching a token via Node.js",
   "dependencies": {
+    "BlobBuilder": "^0.10.0",
+    "binary-pack": "^1.0.2",
+    "blob-util": "^1.1.2",
     "body-parser": "~1.14.1",
+    "bufferutil": "^1.2.1",
     "cookie-parser": "^1.4.1",
     "csurf": "^1.8.3",
     "ejs": "^2.3.4",
@@ -11,8 +15,10 @@
     "express-rate-limit": "^2.0.2",
     "express-secure-only": "^0.2.1",
     "helmet": "^1.0.1",
+    "node-localstorage": "^1.1.2",
     "vcap_services": "^0.1.7",
-    "watson-developer-cloud": "^1.1.2"
+    "watson-developer-cloud": "^1.1.2",
+    "ws": "^1.0.1"
   },
   "repository": {
     "type": "git",

@@ -20,7 +20,8 @@ var express      = require('express'),
     app          = express(),
     vcapServices = require('vcap_services'),
     extend       = require('util')._extend,
-    watson       = require('watson-developer-cloud');
+    watson       = require('watson-developer-cloud'),
+    rtp          = require('./src/tcpstreamupload.js');
 
 // Bootstrap application settings
 require('./config/express')(app);
@@ -29,8 +30,8 @@ require('./config/express')(app);
 var config = extend({
   version: 'v1',
   url: 'https://stream.watsonplatform.net/speech-to-text/api',
-  username: '<username>',
-  password: '<password>'
+  username: '',
+  password: ''
 }, vcapServices.getCredentials('speech_to_text'));
 
 var authService = watson.authorization(config);
@@ -55,3 +56,22 @@ require('./config/error-handler')(app);
 var port = process.env.VCAP_APP_PORT || 3000;
 app.listen(port);
 console.log('listening at:', port);
+var m = {
+                     "url": "https://stream.watsonplatform.net/speech-to-text/api/v1/models/en-US_NarrowbandModel",
+                     "rate": 8000,
+                     "name": "en-US_NarrowbandModel",
+                     "language": "en-US",
+                     "description": "US English narrowband model."
+                  };
+
+authService.getToken({url: config.url}, function(err, token) {
+    if (err)
+      console.log('could not get auth token', err);
+    else {
+        console.log('here is the token', token);
+
+        rtp.initTcpServer({ model : m.name, token : token });
+    }
+
+
+});

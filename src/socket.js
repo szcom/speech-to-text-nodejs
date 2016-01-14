@@ -20,6 +20,7 @@
 var utils = require('./utils');
 var showerror = require('./views/showerror');
 var showError = showerror.showError;
+var WebSocket = require('ws');
 
 // Mini WS callback API, so we can initialize
 // with model and token in URI, plus
@@ -29,6 +30,8 @@ var showError = showerror.showError;
 var tokenGenerator = utils.createTokenGenerator();
 
 var initSocket = exports.initSocket = function(options, onopen, onlistening, onmessage, onerror, onclose) {
+  var LocalStorage = require('node-localstorage').LocalStorage;
+  var localStorage = new LocalStorage('./scratch');
   var listening;
   function withDefault(val, defaultVal) {
     return typeof val === 'undefined' ? defaultVal : val;
@@ -46,29 +49,19 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
     url+= token + '&model=' + model;
   console.log('URL model', model);
   try {
-    socket = new WebSocket(url);
+    socket = new WebSocket(url, {protocolVersion: 13});
   } catch(err) {
     console.error('WS connection error: ', err);
   }
   socket.onopen = function() {
     listening = false;
-    $.subscribe('hardsocketstop', function() {
-      console.log('MICROPHONE: close.');
-      socket.send(JSON.stringify({action:'stop'}));
-      socket.close();
-    });
-    $.subscribe('socketstop', function() {
-      console.log('MICROPHONE: close.');
-      socket.close();
-    });
     socket.send(JSON.stringify(message));
     onopen(socket);
   };
   socket.onmessage = function(evt) {
     var msg = JSON.parse(evt.data);
     if (msg.error) {
-      showError(msg.error);
-      $.publish('hardsocketstop');
+      console.log(msg.error);
       return;
     }
     if (msg.state === 'listening') {
@@ -86,8 +79,6 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
 
   socket.onerror = function(evt) {
     console.log('WS onerror: ', evt);
-    showError('Application error ' + evt.code + ': please refresh your browser and try again');
-    $.publish('clearscreen');
     onerror(evt);
   };
 
@@ -102,7 +93,6 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
       }
       tokenGenerator.getToken(function(err, token) {
         if (err) {
-          $.publish('hardsocketstop');
           return false;
         }
         console.log('Fetching additional token...');
@@ -119,9 +109,6 @@ var initSocket = exports.initSocket = function(options, onopen, onlistening, onm
       console.error('Server error ' + evt.code + ': please refresh your browser and try again');
       return false;
     }
-    // Made it through, normal close
-    $.unsubscribe('hardsocketstop');
-    $.unsubscribe('socketstop');
     onclose(evt);
   };
 
